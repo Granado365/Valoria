@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A Crônica dos 10 Dias</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Crimson+Pro:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--ink:#12172b;--ink2:#1c2340;--line:#39426b;--amber:#f0a93b;--bone:#efe6d2;--moss:#7fa56a;--ember:#c4472f;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -10%,#2a3260,var(--ink) 60%) fixed;color:var(--bone);font:19px/1.5 'Crimson Pro',Georgia,serif;min-height:100vh}
+h1,h2,h3,button,.tab{font-family:Cinzel,Georgia,serif}
+header{padding:28px 16px 8px;text-align:center}h1{margin:0;font-size:clamp(28px,7vw,52px);font-weight:800;color:var(--amber);letter-spacing:.02em;text-shadow:0 0 24px #f0a93b55}
+header p{margin:4px 0 0;opacity:.75}
+nav{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:14px 8px;position:sticky;top:0;background:#12172bdd;backdrop-filter:blur(6px);z-index:5}
+.tab{background:none;border:1px solid var(--line);color:var(--bone);padding:8px 16px;border-radius:4px;cursor:pointer;font-size:15px}
+.tab.on{background:var(--amber);color:var(--ink);border-color:var(--amber)}
+main{max-width:760px;margin:0 auto;padding:12px 14px 60px}
+.box{background:var(--ink2);border:1px solid var(--line);border-radius:6px;padding:20px;margin-bottom:16px}
+label{display:block;font-size:16px;margin:10px 0 3px;opacity:.85}
+input,select,textarea{width:100%;padding:11px;background:var(--ink);border:1px solid var(--line);color:var(--bone);border-radius:4px;font:inherit}
+input:focus,select:focus,button:focus-visible,textarea:focus{outline:2px solid var(--amber);outline-offset:1px}
+.btn{margin-top:16px;width:100%;padding:13px;background:var(--amber);color:var(--ink);border:0;border-radius:4px;font-weight:800;font-size:16px;cursor:pointer}
+.btn.alt{background:none;color:var(--bone);border:1px solid var(--line);margin-top:8px}
+.xp{font:800 56px Cinzel,serif;color:var(--amber);line-height:1}
+.bar{height:14px;background:var(--ink);border:1px solid var(--line);border-radius:7px;overflow:hidden;margin:10px 0 4px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ember),var(--amber));transition:width .8s}
+.row{display:grid;grid-template-columns:34px 1fr auto;gap:10px;padding:10px 4px;border-bottom:1px solid #39426b66;align-items:center}
+.row small{opacity:.7;display:block;line-height:1.2}.row b{font-family:Cinzel,serif;color:var(--amber)}
+.row.top{background:#f0a93b14}.sub{display:flex;gap:6px;margin-bottom:10px}
+.pill{font-size:14px;color:var(--moss)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,40px);opacity:0;background:var(--bone);color:var(--ink);padding:14px 20px;border-radius:6px;max-width:90vw;font-weight:600;transition:.3s;z-index:9}
+#toast.on{transform:translate(-50%,0);opacity:1}#toast.bad{background:var(--ember);color:#fff}
+#qr{background:#fff;padding:14px;display:inline-block;border-radius:6px}
+.c{text-align:center}.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+</style></head><body>
+<header><h1>A Crônica dos 10 Dias</h1><p>Resista ao Cerco das Sombras. Cada aula conta.</p></header>
+<nav id="nav"></nav><main id="v"></main><div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s),E=s=>document.getElementById(s);
+const api=(a,d={})=>fetch('/api',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({a,...d})}).then(r=>r.json()).then(j=>{if(j.e)throw j.e;return j});
+const toast=(m,bad)=>{const t=E('toast');t.textContent=m;t.className='on'+(bad?' bad':'');clearTimeout(t.h);t.h=setTimeout(()=>t.className='',4500)};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const CL=['Guardião do Saber','Arqueiro da Lógica','Mago das Letras','Paladino das Ciências'];
+let S=JSON.parse(localStorage.s||'null'),tab='hero',timer,P=new URLSearchParams(location.search);
+if(P.get('r')){sessionStorage.p=JSON.stringify({r:P.get('r'),t:P.get('t')});history.replaceState({},'','/')}
+const TABS=[['hero','Meu herói'],['board','Placar'],['mestre','Mestre'],['admin','Admin']];
+function go(t){tab=t;clearInterval(timer);E('nav').innerHTML=TABS.map(([k,n])=>`<button class="tab ${k==tab?'on':''}" onclick="go('${k}')">${n}</button>`).join('');({hero,board,mestre,admin})[t]()}
+async function hero(){
+  if(!S)return authView('login');
+  try{const u=await api('login',S);card(u);const p=sessionStorage.p;if(p){sessionStorage.removeItem('p');const {r,t}=JSON.parse(p);const x=await api('scan',{...S,prof:r,t});card(x);toast(`+${x.gain} XP em ${x.aula}!${x.bonus?' Bônus do dia desbloqueado!':''}`)}}
+  catch(e){toast(e,1);if(/inválido/.test(e)){S=null;localStorage.removeItem('s');authView('login')}else if(S)card(await api('login',S))}
+}
+function authView(m){const reg=m=='reg';E('v').innerHTML=`<div class="box"><h2 style="margin-top:0">${reg?'Crie seu aventureiro':'Entrar na guilda'}</h2>
+${sessionStorage.p?'<p class="pill">Você escaneou uma runa. Entre para receber seu XP.</p>':''}
+<label>RA / Matrícula</label><input id="ra" inputmode="numeric" autocomplete="username">
+${reg?`<label>Seu nome</label><input id="nm"><label>Turma (sua guilda)</label><input id="tm" placeholder="Ex.: 8A">
+<label>Nome do personagem</label><input id="ch"><label>Classe</label><select id="cl">${CL.map(c=>`<option>${c}</option>`).join('')}</select>`:''}
+<label>PIN de 4 números</label><input id="pin" type="password" inputmode="numeric" maxlength="4">
+<button class="btn" onclick="auth('${m}')">${reg?'Criar personagem':'Entrar'}</button>
+<button class="btn alt" onclick="authView('${reg?'login':'reg'}')">${reg?'Já tenho conta':'Primeiro acesso? Criar personagem'}</button></div>`}
+async function auth(m){const v=i=>E(i)?.value||'',d={ra:v('ra').trim(),pin:v('pin')};
+  try{if(m=='reg')Object.assign(d,{name:v('nm'),turma:v('tm'),char:v('ch'),classe:v('cl')});await api(m,d);S={ra:d.ra,pin:d.pin};localStorage.s=JSON.stringify(S);go('hero')}catch(e){toast(e,1)}}
+async function card(u){const b=await api('board');const pct=Math.min(100,u.xp/b.max*100),meta=b.max*b.c.meta/100,pos=b.alunos.findIndex(a=>a.name==u.name&&a.xp==u.xp)+1;
+E('v').innerHTML=`<div class="box c"><h2 style="margin:0">${esc(u.char)}</h2><div class="pill">${u.classe} · guilda ${esc(u.turma)}</div><br>
+<div class="xp">${u.xp}</div><div>pontos de experiência</div>
+<div class="bar"><i style="width:${pct}%"></i></div><small>Meta de honra: ${meta} XP (${b.c.meta}%) ${u.xp>=meta?'— conquistada!':''}</small>
+<div class="g2" style="margin-top:16px"><div class="box" style="margin:0"><b>${u.streak}</b> dia(s) seguidos</div><div class="box" style="margin:0"><b>${pos}º</b> no placar</div></div>
+<p>Hoje: ${u.hoje}/${b.c.aulasDia} aulas registradas.<br>Para ganhar XP, abra a <b>câmera do celular</b> e aponte para o QR Code do Mestre.</p>
+<button class="btn alt" onclick="S=null;localStorage.removeItem('s');go('hero')">Sair</button></div>`}
+async function board(){E('v').innerHTML='<p class="c">Consultando o pergaminho...</p>';let m='i';
+ const draw=async()=>{try{const b=await api('board'),meta=b.max*b.c.meta/100;
+  let h=`<div class="sub"><button class="tab ${m=='i'?'on':''}" onclick="m='i';draw()">Aventureiros</button><button class="tab ${m=='t'?'on':''}" onclick="m='t';draw()">Guildas</button></div><div class="box">`;
+  if(m=='i')h+=b.alunos.length?b.alunos.map((a,i)=>`<div class="row ${i<10?'top':''}"><span>${i<3?['🥇','🥈','🥉'][i]:i+1}</span><span>${esc(a.char)}<small>${a.classe} · ${esc(a.turma)} ${a.xp>=meta?'· ✔ meta':''}</small></span><b>${a.xp}</b></div>`).join('')+'<p class="pill">Os 10 primeiros (destacados) entram no sorteio final.</p>':'<p>Nenhum aventureiro ainda.</p>';
+  else{const t={};b.alunos.forEach(a=>{(t[a.turma]??={s:0,n:0}).s+=a.xp;t[a.turma].n++});
+   h+=Object.entries(t).map(([k,v])=>[k,v.s/v.n,v.n]).sort((x,y)=>y[1]-x[1]).map(([k,avg,n],i)=>`<div class="row"><span>${i+1}</span><span>Guilda ${esc(k)}<small>${n} aventureiros · média por aluno</small></span><b>${avg.toFixed(0)}</b></div>`).join('')||'<p>Sem guildas ainda.</p>'}
+  E('v').innerHTML=h+'</div>'}catch(e){toast(e,1)}};
+ window.draw=draw;window.m=m;Object.defineProperty(window,'m',{get:()=>m,set:v=>m=v});draw();timer=setInterval(draw,20000)}
+function mestre(){E('v').innerHTML=`<div class="box"><h2 style="margin-top:0">Runa de Presença</h2><p>Mostre o QR na sala ao final da aula. Ele muda a cada minuto, então foto não funciona.</p>
+<label>ID do Mestre</label><input id="pid" inputmode="numeric"><label>Chave do Mestre</label><input id="pk" type="password">
+<button class="btn" onclick="runa()">Exibir QR Code</button><div class="c" id="rq" style="margin-top:18px"></div></div>`}
+async function runa(){clearInterval(timer);let last='';const f=async()=>{try{const id=E('pid').value.trim(),r=await api('qr',{id,key:E('pk').value});if(r.t==last)return;last=r.t;
+  E('rq').innerHTML=`<h3>${esc(r.name)} · ${esc(r.disc)}</h3><div id="qr"></div>`;new QRCode(E('qr'),{text:`${location.origin}/?r=${id}&t=${r.t}`,width:260,height:260})}catch(e){clearInterval(timer);toast(e,1)}};f();timer=setInterval(f,5000)}
+async function admin(){E('v').innerHTML=`<div class="box"><h2 style="margin-top:0">Painel do Admin</h2><label>Senha de admin</label><input id="pw" type="password"><button class="btn" onclick="adm('get')">Abrir</button></div><div id="ad"></div>`}
+async function adm(op,x={}){try{const pw=E('pw').value,r=await api('admin',{pw,op,...x}),c=r.c;
+ E('ad').innerHTML=`<div class="box"><h3 style="margin-top:0">Regras</h3><div class="g2">
+ ${[['xpAula','XP por aula'],['bonus','Bônus do dia'],['aulasDia','Aulas por dia'],['dias','Dias de campanha'],['meta','Meta de honra (%)']].map(([k,n])=>`<div><label>${n}</label><input id="c_${k}" type="number" value="${c[k]}"></div>`).join('')}</div>
+ <h3>Mestres (1 por linha: Nome | Disciplina | chave secreta)</h3><textarea id="pf" rows="10">${r.profs.map(p=>`${p.name} | ${p.disc} | ${p.key}`).join('\n')}</textarea>
+ <small>O ID de cada Mestre é o número da linha (1, 2, 3...).</small>
+ <button class="btn" onclick="saveAdm()">Salvar</button><button class="btn alt" onclick="if(confirm('Apagar TODOS os alunos e registros?'))adm('reset')">Zerar bimestre</button></div>`}catch(e){toast(e,1)}}
+function saveAdm(){const c={};['xpAula','bonus','aulasDia','dias','meta'].forEach(k=>c[k]=+E('c_'+k).value);
+ const profs=E('pf').value.split('\n').map(l=>l.split('|').map(s=>s.trim())).filter(a=>a[0]&&a[2]).map(a=>({name:a[0],disc:a[1]||'',key:a[2]}));adm('save',{c,profs});toast('Salvo!')}
+go('hero');
+</script></body></html>
